@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "fastify-backend": "file:fastify-backend"
+  }
+}

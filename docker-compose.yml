@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  fastify-backend:
+    image: fastify-backend
+    build: ./fastify-backend
+    networks:
+      - main-network
+    ports:
+      - 3030:8080
+
+  db:
+    image: postgres-db
+    build: ./db-postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - main-network
+    environment:
+      - POSTGRES_USER=dummy
+      - POSTGRES_PASSWORD=dummy
+      - POSTGRES_DB=PRESIO_DB
+    ports:
+      - 5555:5432
+  
+  adminer:
+    image: adminer
+    depends_on:
+      - db
+    networks:
+      - main-network
+    
+    ports:
+      - 4444:8080
+
+
+volumes:
+  db-data:
+
+networks:
+  main-network:

@@ -1,0 +1,11 @@
+{
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "./fastify-backend/src/.*.ts",
+                "cmd":"npx tsc -p ./fastify-backend/tsconfig.json && docker cp ./fastify-backend/build/. presio-back-fastify-backend-1:/opt/app/"
+            },
+        
+        ]
+    }
+}
