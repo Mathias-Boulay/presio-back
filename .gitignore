@@ -130,7 +130,7 @@ dist
 .pnp.*
 
 # Project specific ignores
-fastify-backend/src/dbschema
+fastify-backend/src/dbschema/
 fastify-backend/build/
-dbschema/
+fastify-backend/dbschema
 
