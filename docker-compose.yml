@@ -8,33 +8,23 @@ services:
     ports:
       - 3030:8080
 
-  db:
-    image: postgres-db
-    build: ./db-postgres
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    networks:
-      - main-network
+  edgedb:
+    image: edge-db
+    build: ./edge-db
     environment:
-      - POSTGRES_USER=dummy
-      - POSTGRES_PASSWORD=dummy
-      - POSTGRES_DB=PRESIO_DB
+      - EDGEDB_SERVER_SECURITY=insecure_dev_mode
+    volumes:
+      - edgedb-data:/var/lib/edgedb/data
     ports:
-      - 5555:5432
-  
-  adminer:
-    image: adminer
-    depends_on:
-      - db
+      - 5656:5656
+    expose:
+      - 5656
     networks:
       - main-network
-    
-    ports:
-      - 4444:8080
 
 
 volumes:
-  db-data:
+  edgedb-data:
 
 networks:
   main-network:

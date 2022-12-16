@@ -6,19 +6,28 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p tsconfig.json",
-    "start": "node ./src/index.js",
+    "//build_edgeql_js": "Generate query builder files",
+    "build_edgeql_js": "npx @edgedb/generate edgeql-js --out ./src/dbschema --force-overwrite -H 127.0.0.1 -P 5656 --target ts --tls-security insecure",
+    "//build_edge_types": "The output path is not yet configurable, so just wrap the command with file operations",
+    "build_edge_types": "mkdir ./dbschema && npx @edgedb/generate interfaces --force-overwrite -H 127.0.0.1 -P 5656 --tls-security insecure && mv ./dbschema/* ./src/dbschema/",
+    "build_db": "npm run build_edgeql_js && npm run build_edge_types",
+    "start": "nodemon ./src/index.js",
     "dev": ""
   },
   "author": "Mathias Boulay",
   "license": "",
   "dependencies": {
-    "fastify": "^4.10.2"
+    "@fastify/type-provider-typebox": "^2.4.0",
+    "@sinclair/typebox": "^0.25.13",
+    "edgedb": "^1.0.2",
+    "fastify": "^4.10.2",
+    "nodemon": "^2.0.20"
   },
   "devDependencies": {
+    "@edgedb/generate": "^0.0.7-beta.2",
     "@tsconfig/node18": "^1.0.1",
     "@types/node": "^18.11.13",
     "typescript": "^4.9.4"
   },
-
   "type": "module"
 }
