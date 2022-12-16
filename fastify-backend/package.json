@@ -11,7 +11,7 @@
     "//build_edge_types": "The output path is not yet configurable, so just wrap the command with file operations",
     "build_edge_types": "mkdir ./dbschema && npx @edgedb/generate interfaces --force-overwrite -H 127.0.0.1 -P 5656 --tls-security insecure && mv ./dbschema/* ./src/dbschema/",
     "build_db": "npm run build_edgeql_js && npm run build_edge_types",
-    "start": "nodemon ./src/index.js",
+    "start": "nodemon --experimental-specifier-resolution=node ./index.js",
     "dev": ""
   },
   "author": "Mathias Boulay",

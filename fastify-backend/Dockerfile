@@ -5,4 +5,4 @@ copy ./src/edgedb.toml /opt/app/edgedb.toml
 WORKDIR /opt/app
 
 RUN npm install
-CMD node --experimental-specifier-resolution=node ./index.js
+CMD npm start
