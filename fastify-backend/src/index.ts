@@ -1,8 +1,32 @@
-import fastify from 'fastify'
+import Fastify from 'fastify'
+import cors from '@fastify/cors'
+import fastifyAuth from '@fastify/auth'
 import * as edgedb from "edgedb";
 import e from './dbschema'
+import { decorateInstance as decorateInstanceAuth} from './routes/auth/authentication';
+import { decorateInstanceEdge } from './edgedb-wrapper';
+import { routes as userRoutes } from './routes/users'
+import { routes as presentationRoutes } from './routes/presentations'
+import { Presentation } from './dbschema/modules/default';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 
-const server = fastify();
+
+export const fastifyInstance = Fastify().withTypeProvider<TypeBoxTypeProvider>();
+
+decorateInstanceAuth(fastifyInstance);
+decorateInstanceEdge(fastifyInstance);
+
+fastifyInstance
+  .register(cors)
+  .register(fastifyAuth, {
+    defaultRelation: 'and'
+  });
+
+// Load the plugins before defining routes
+await fastifyInstance.after(); 
+
+
+fastifyInstance.register(userRoutes).register(presentationRoutes);
 
 // Bad, but good enough for development purposes
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -27,16 +51,20 @@ setTimeout(async () => {
 
   const result = await query.run(dbInstance);
 
+
   console.log(result);
   
 }, 20000)
 
 
-server.get('/ping', async (request, reply) => {
+
+fastifyInstance.get('/ping', async (request, reply) => {
   return `${test}\n`
 })
 
-server.listen({ port: 8080, host: '0.0.0.0' }, (err, address) => {
+fastifyInstance.after()
+
+fastifyInstance.listen({ port: 8080, host: '0.0.0.0' }, (err, address) => {
   if (err) {
     console.error(err)
     process.exit(1)

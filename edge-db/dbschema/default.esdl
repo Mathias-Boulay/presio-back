@@ -25,22 +25,25 @@ module default {
 
   type Presentation {
     required property name -> str;
-    link modelId -> Presentation;
+    required link owner -> User {
+      on target delete delete source;
+    }
+    link model -> Presentation;
   }
 
   type PresentationDevice extending Object3D {
-    required link presentation -> Presentation;
+    required link presentation -> Presentation {
+      on target delete delete source
+    }
     required link device -> Device;
+    property imagePath -> str;
   }
 
   type PresentationLight extending Object3D {
-    required link presentation -> Presentation;
+    required link presentation -> Presentation {
+      on target delete delete source;
+    }
     required property lightType -> LightType;
-  }
-
-  type PresentationImage {
-    required link presenttationId -> Presentation;
-    required property path -> str;
   }
 
   type User {

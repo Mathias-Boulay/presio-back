@@ -1,4 +1,4 @@
-CREATE MIGRATION m1ler3q2nkidc47znqs7a55rpf7be7ivxaysfkpjs6r54y3ose7qya
+CREATE MIGRATION m1fizig47kpuxtk744mf2gcbjcwvruv5ge7pzeixlr7ebdhaff277q
     ONTO initial
 {
   CREATE SCALAR TYPE default::UserPermission EXTENDING enum<PERM_USER, PERM_ADMIN>;
@@ -22,7 +22,8 @@ CREATE MIGRATION m1ler3q2nkidc47znqs7a55rpf7be7ivxaysfkpjs6r54y3ose7qya
       CREATE REQUIRED PROPERTY z -> std::float64;
   };
   CREATE TYPE default::Presentation {
-      CREATE LINK modelId -> default::Presentation;
+      CREATE LINK model -> default::Presentation;
+      CREATE REQUIRED LINK owner -> default::User;
       CREATE REQUIRED PROPERTY name -> std::str;
   };
   CREATE TYPE default::PresentationDevice EXTENDING default::Object3D {
@@ -35,7 +36,7 @@ CREATE MIGRATION m1ler3q2nkidc47znqs7a55rpf7be7ivxaysfkpjs6r54y3ose7qya
       CREATE REQUIRED PROPERTY lightType -> default::LightType;
   };
   CREATE TYPE default::PresentationImage {
-      CREATE REQUIRED LINK presenttationId -> default::Presentation;
+      CREATE REQUIRED LINK presentation -> default::Presentation;
       CREATE REQUIRED PROPERTY path -> std::str;
   };
 };

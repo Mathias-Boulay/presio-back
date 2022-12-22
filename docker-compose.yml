@@ -1,6 +1,8 @@
 version: "3.9"
 services:
   fastify-backend:
+    depends_on:
+      - edgedb
     image: fastify-backend
     build: ./fastify-backend
     networks:
