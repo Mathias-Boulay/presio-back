@@ -61,6 +61,7 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
 
     // Bad but the typing is broken for some reason
     const id = request.params.id;
+    
 
     reply.send(await getPresentation(fastify, id, request.userId));
   });
@@ -70,51 +71,64 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
   /** Get the presentation, from the id */
   async function getPresentation(fastify: FastifyInstance, presentationId: string, owner: string | undefined = undefined): Promise<Presentation | null> {
     console.log("get presentation")
-    const presentationUuid = e.uuid(presentationId);
 
-    const queryDevices = e.select(e.PresentationDevice, (device) => ({
-      id: true,
-      imagePath: true,
-      x: true,
-      y: true,
-      z: true,
-      yaw: true,
-      pitch: true,
-      roll: true,
+    
 
-      device : {
+    function buildQueryDevices(presentationId: string | any){
+      return e.select(e.PresentationDevice, (device) => ({
         id: true,
-        name: true,
-        filePath: true
-      },
+        imagePath: true,
+        x: true, y: true, z: true,
+        yaw: true, pitch: true, roll: true,
+  
+        device : { id: true, name: true, filePath: true},
+  
+        filter: e.op(device.presentation.id, '=', e.uuid(presentationId))
+      }));
+    }
 
-      filter: e.op(device.presentation.id, '=', presentationUuid)
-    }));
+    function buildQueryLights(presentationId: string){
+      return e.select(e.PresentationLight, (light) => ({
+        id: true,
+        lightType: true,
+        x: true, y: true, z: true,
+        yaw: true, pitch: true, roll: true,
+  
+        filter: e.op(light.presentation.id, '=', e.uuid(presentationId))
+      })); 
+    }
 
-
-    const queryLights = e.select(e.PresentationLight, (light) => ({
-      id: true,
-      lightType: true,
-      x: true,
-      y: true,
-      z: true,
-      yaw: true,
-      pitch: true,
-      roll: true,
-
-      filter: e.op(light.presentation.id, '=', presentationUuid)
-    }));
 
     // Filter with the owner if necessary.
     const queryBasePresentation = e.assert_single(e.select(e.Presentation, (presentation) => ({
       id: true,
       name: true,
-      devices: queryDevices,
-      lights: queryLights,
+      devices: buildQueryDevices(presentationId),
+      lights: buildQueryLights(presentationId), 
+      model: {
+        id: true,
+        devices: e.select(e.PresentationDevice, (device) => ({
+          id: true,
+          imagePath: true,
+          x: true, y: true, z: true,
+          yaw: true, pitch: true, roll: true,
+    
+          device : { id: true, name: true, filePath: true},
+          filter: e.op(device.presentation.id, '=', presentation.id)
+        })),
+        lights: e.select(e.PresentationLight, (light) => ({
+          id: true,
+          lightType: true,
+          x: true, y: true, z: true,
+          yaw: true, pitch: true,roll: true,
+    
+          filter: e.op(light.presentation.id, '=', presentation.id)
+        }))
+      },
 
       filter: (owner ?
-        e.op(e.op(presentation.owner.id, '=', e.uuid((owner))), 'and', e.op(presentation.id, '=', presentationUuid))
-        : e.op(presentation.id, '=', presentationUuid))
+        e.op(e.op(presentation.owner.id, '=', e.uuid((owner))), 'and', e.op(presentation.id, '=', e.uuid(presentationId)))
+        : e.op(presentation.id, '=', e.uuid(presentationId)))
     }))); 
 
     const result = await queryBasePresentation.run(fastify.edgedb);
@@ -138,7 +152,7 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     //TODO THIS IS UNOPTIMIZED !
     const props = request.body;
     
-    const modelPresentation = await getPresentation(fastify, props.id);
+    const modelPresentation = (await getPresentation(fastify, props.id));
     const insertQuery = e.insert(e.Presentation, {
       name: 'Untitled query',
       owner: e.select(e.User, (presentation) => ({
