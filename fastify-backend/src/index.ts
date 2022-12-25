@@ -9,12 +9,17 @@ import { routes as userRoutes } from './routes/users'
 import { routes as presentationRoutes } from './routes/presentations'
 import { Presentation } from './dbschema/modules/default';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
+import { decorateInstanceEnv } from './env-wrapper';
 
 
 export const fastifyInstance = Fastify().withTypeProvider<TypeBoxTypeProvider>();
 
+decorateInstanceEnv(fastifyInstance);
+await fastifyInstance.after();  // Ensure env is loaded
+
 decorateInstanceAuth(fastifyInstance);
 decorateInstanceEdge(fastifyInstance);
+
 
 fastifyInstance
   .register(cors)

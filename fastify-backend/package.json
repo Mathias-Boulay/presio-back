@@ -24,6 +24,7 @@
   "dependencies": {
     "@fastify/auth": "^4.2.0",
     "@fastify/cors": "^8.2.0",
+    "@fastify/env": "^4.2.0",
     "@fastify/type-provider-typebox": "^2.4.0",
     "@sinclair/typebox": "^0.25.13",
     "edgedb": "^1.0.2",

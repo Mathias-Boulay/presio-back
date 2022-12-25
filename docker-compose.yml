@@ -9,6 +9,10 @@ services:
       - main-network
     ports:
       - 3030:8080
+    environment:
+      - GOOGLE_AUTH_ID=${GOOGLE_AUTH_ID}
+      - GOOGLE_AUTH_SECRET=${GOOGLE_AUTH_SECRET}
+      - GOOGLE_AUTH_RETURN_URI=${GOOGLE_AUTH_RETURN_URI}
 
   edgedb:
     image: edge-db

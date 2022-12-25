@@ -1,11 +1,12 @@
 import fastifyAuth, {FastifyAuthFunction} from '@fastify/auth';
 import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { GoogleAuth } from 'google-auth-library';
 import { fastifyInstance } from '../..';
 import e from '../../dbschema';
 import { UserPermission } from '../../dbschema/interfaces';
 
 
-import { googleCheck } from './google_auth';
+import { getClient, googleCheck } from './google_auth';
 
 // Declare the additional request property
 declare module 'fastify' {
@@ -29,6 +30,8 @@ export type IdentityCheckerFunction = (token: string) => Promise<string | undefi
 export function decorateInstance(fastify: FastifyInstance){
   fastify.decorate('handleAuth', handleAuth);
   fastify.decorateRequest('userEmail', '');
+
+  getClient(fastify);
 }
 
 /** Check whether a user is connected, called by on route */
