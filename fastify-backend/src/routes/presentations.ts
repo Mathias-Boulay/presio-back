@@ -3,7 +3,7 @@ import { hasPerms } from "./auth/authentication";
 import e, { select } from '../dbschema'
 
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
-import { Presentation } from "../schema/presentation";
+import { Presentation, UserPresentation } from "../schema/presentation";
 import { ID, idSchema } from "../schema/presentation";
 import { Pagination, paginationSchema } from "../schema/parts/pagination";
 
@@ -79,7 +79,7 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     
 
   /** Get the presentation, from the id */
-  async function getPresentation(fastify: FastifyInstance, presentationId: string, owner: string | undefined = undefined): Promise<Presentation | null> {
+  async function getPresentation(fastify: FastifyInstance, presentationId: string, owner: string | undefined = undefined): Promise<Presentation | UserPresentation | null> {
     console.log("get presentation")
 
     

@@ -59,7 +59,14 @@ export const presentationSchema = Type.Intersect([
     devices: Type.Array(devicePresentationSchema),
     lights: Type.Array(lightPresentationSchema)
   })
-])
+]);
+
+export const userPresentationSchema = Type.Intersect([
+  presentationSchema,
+  Type.Object({
+    model: presentationSchema
+  })
+]);
 
 export type ID = Static<typeof idSchema>;
 export type Position = Static<typeof positionSchema>;
@@ -69,6 +76,7 @@ export type LightType = Static<typeof lightTypeSchema>;
 export type LightPresentation = Static<typeof lightPresentationSchema>;
 export type DevicePresentation = Static<typeof devicePresentationSchema>;
 export type Presentation = Static<typeof presentationSchema>;
+export type UserPresentation = Static<typeof userPresentationSchema>;
 
 
 
