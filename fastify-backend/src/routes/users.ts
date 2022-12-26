@@ -3,6 +3,7 @@ import e from '../dbschema'
 import { handleAuth, hasPerms } from "./auth/authentication";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { ID, idSchema } from "../schema/presentation";
+import { permissions, permissionsSchema } from "../schema/users";
 
 
 export const routes: FastifyPluginCallback = async (fastify, opts) => {
@@ -25,9 +26,9 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     const users = await queryUsers.run(fastify.edgedb);
 
     return users;
-  })
+  });
 
-
+  /** Create a new user with the default permission level */
   fastify.post('/users', {
     onRequest: fastify.auth([
       fastify.handleAuth
@@ -44,13 +45,14 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     reply.send(result);
   });
 
+  /** Remove an existing user */
   server.delete<{Params: ID}>('/user/:id', {
     schema: idSchema,
     onRequest: fastify.auth([
       handleAuth,
-      hasPerms(['PERM_USER'])
+      hasPerms(['PERM_ADMIN'])
     ])
-  },async (request, reply) => {
+  }, async (request, reply) => {
     
     // Pull the user out of the db, the schema handles cascade deletion
     const deleteQuery = e.delete(e.User, user => ({
@@ -65,4 +67,27 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
 
       reply.send({});
   });
+
+  /** Replace the permission list of a user */
+  server.patch<{Params: ID, Body: permissions }>('/user/:id/permissions', {
+    onRequest: fastify.auth([
+      fastify.handleAuth,
+      hasPerms(['PERM_ADMIN'])
+    ]),
+
+    schema: {
+      body: permissionsSchema
+    }
+  },async (request, reply) => {
+    const query = e.update(e.User, user => ({
+      filter_single: {id: e.uuid(request.params.id)},
+      set: {
+        permissions: request.body
+      }
+    }));
+
+    const result = await query.run(server.edgedb);
+
+    return result;
+  })
 }
