@@ -5,6 +5,7 @@ import e, { select } from '../dbschema'
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { Presentation } from "../schema/presentation";
 import { ID, idSchema } from "../schema/presentation";
+import { Pagination, paginationSchema } from "../schema/parts/pagination";
 
 
 
@@ -12,18 +13,23 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
   const server = fastify.withTypeProvider<TypeBoxTypeProvider>();
 
   /** List all presentations of a user */
-  fastify.get('/presentations', {
+  server.get<{Querystring: Pagination}>('/presentations', {
     onRequest: fastify.auth([
       fastify.handleAuth,
       hasPerms(['PERM_USER'])
-    ])
+    ]),
+    schema: {
+      querystring: paginationSchema
+    }
   },async (request, reply) => {
     console.log(request.userId);
     const query = e.select(e.Presentation, (presentation) => ({
       id: true,
       name: true,
 
-      filter: e.op(presentation.owner.id, '=', e.uuid(request.userId))
+      filter: e.op(presentation.owner.id, '=', e.uuid(request.userId)),
+      limit: request.query.limit,
+      offset: request.query.offset
     }));
 
     const result = await query.run(fastify.edgedb);
@@ -32,15 +38,19 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     reply.send(result);
   });
 
-  /** List all models */
-  fastify.get('/presentations-models', {
-
+  /** List all presentation models */
+  server.get<{Querystring: Pagination}>('/presentations-models', {
+    schema: {
+      querystring: paginationSchema
+    }
   },async (request, reply) => {
     const query = e.select(e.Presentation, (presentation) => ({
       id: true,
       name: true,
 
-      filter: e.op('not', e.op('exists', presentation.model))
+      filter: e.op('not', e.op('exists', presentation.model)),
+      limit: request.query.limit,
+      offset: request.query.offset
     }));
 
     const result = await query.run(fastify.edgedb);
