@@ -38,6 +38,22 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     reply.send(result);
   });
 
+  /** Get meta data linked to user presentations */
+  server.get('/presentations-meta', {
+    onRequest: fastify.auth([
+      fastify.handleAuth,
+      hasPerms(['PERM_USER'])
+    ]),
+  },async (request, reply) => {
+    const countQuery = e.count(e.select(e.Presentation, presentation => ({
+      filter: e.op(presentation.owner.id, '=', e.uuid(request.userId))
+    })));
+    const result = await countQuery.run(fastify.edgedb);
+
+    reply.send({count: result});
+  });
+
+
   /** List all presentation models */
   server.get<{Querystring: Pagination}>('/presentations-models', {
     schema: {
@@ -56,6 +72,19 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     const result = await query.run(fastify.edgedb);
 
     reply.send(result);
+  });
+
+  /** Meta data related to presentation models */
+  server.get('/presentation-models-meta', {
+
+  },async (request, reply) => {
+    const countQuery = e.count(e.select(e.Presentation, presentation => ({
+      filter: e.op('not', e.op('exists', presentation.model)),
+    })));
+
+    const count = await countQuery.run(fastify.edgedb);
+
+    reply.send({count: count});
   });
 
   /** Get a specific presentation data */
