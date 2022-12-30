@@ -9,6 +9,11 @@ export const permissionSchema = Type.Union([
 
 export const permissionsSchema = Type.Array(permissionSchema);
 
+export const userSchema = Type.Object({
+  id: Type.String(),
+  email: Type.String({format: 'email'}),
+  permissions: permissionsSchema
+});
 
-
-export type permissions = Static<typeof permissionsSchema>;
+export type Permissions = Static<typeof permissionsSchema>;
+export type User = Static<typeof userSchema>;

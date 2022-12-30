@@ -3,9 +3,11 @@ import { hasPerms } from "./auth/authentication";
 import e, { select } from '../dbschema'
 
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
-import { Presentation, UserPresentation } from "../schema/presentation";
+import { Presentation, presentationMetadataSchema, presentationSchema, simplePresentationSchema, UserPresentation, userPresentationSchema } from "../schema/presentation";
 import { ID, idSchema } from "../schema/presentation";
 import { Pagination, paginationSchema } from "../schema/parts/pagination";
+import { Type } from "@sinclair/typebox";
+import { Presentation } from "../dbschema/modules/default";
 
 
 
@@ -19,7 +21,10 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
       hasPerms(['PERM_USER'])
     ]),
     schema: {
-      querystring: paginationSchema
+      querystring: paginationSchema,
+      response: {
+        '2xx': Type.Array(simplePresentationSchema)
+      }
     }
   },async (request, reply) => {
     console.log(request.userId);
@@ -44,6 +49,11 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
       fastify.handleAuth,
       hasPerms(['PERM_USER'])
     ]),
+    schema: {
+      response: {
+        '2xx': presentationMetadataSchema
+      }
+    }
   },async (request, reply) => {
     const countQuery = e.count(e.select(e.Presentation, presentation => ({
       filter: e.op(presentation.owner.id, '=', e.uuid(request.userId))
@@ -57,7 +67,10 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
   /** List all presentation models */
   server.get<{Querystring: Pagination}>('/presentations-models', {
     schema: {
-      querystring: paginationSchema
+      querystring: paginationSchema,
+      response: {
+        '2xx': Type.Array(simplePresentationSchema)
+      }
     }
   },async (request, reply) => {
     const query = e.select(e.Presentation, (presentation) => ({
@@ -76,7 +89,11 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
 
   /** Meta data related to presentation models */
   server.get('/presentation-models-meta', {
-
+    schema: {
+      response: {
+        '2xx': presentationMetadataSchema
+      }
+    }
   },async (request, reply) => {
     const countQuery = e.count(e.select(e.Presentation, presentation => ({
       filter: e.op('not', e.op('exists', presentation.model)),
@@ -90,7 +107,10 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
   /** Get a specific presentation data */
   server.get<{Params: ID}>('/presentation/:id',{
     schema: {
-      params: idSchema
+      params: idSchema,
+      response: {
+        '2xx': Type.Union([userPresentationSchema, presentationSchema])
+      }
     },
     onRequest: fastify.auth([
       fastify.handleAuth,
@@ -101,8 +121,9 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     // Bad but the typing is broken for some reason
     const id = request.params.id;
     
-
-    reply.send(await getPresentation(fastify, id, request.userId));
+    const result = await getPresentation(fastify, id, request.userId);
+    console.dir(result, {depth: null})
+    reply.send(result);
   });
 
     
@@ -146,6 +167,7 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
       lights: buildQueryLights(presentationId), 
       model: {
         id: true,
+        name: true,
         devices: e.select(e.PresentationDevice, (device) => ({
           id: true,
           imagePath: true,
@@ -153,7 +175,7 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
           yaw: true, pitch: true, roll: true,
     
           device : { id: true, name: true, filePath: true},
-          filter: e.op(device.presentation.id, '=', presentation.id)
+          filter: e.op(device.presentation.id, '=', presentation.model.id)
         })),
         lights: e.select(e.PresentationLight, (light) => ({
           id: true,
@@ -161,7 +183,7 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
           x: true, y: true, z: true,
           yaw: true, pitch: true,roll: true,
     
-          filter: e.op(light.presentation.id, '=', presentation.id)
+          filter: e.op(light.presentation.id, '=', presentation.model.id)
         }))
       },
 
@@ -171,7 +193,7 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
     }))); 
 
     const result = await queryBasePresentation.run(fastify.edgedb);
-    console.log(result);
+    //console.log(result);
     if(!result)
       throw new Error("No result ! Probably no permission to access the data");
       
@@ -181,7 +203,10 @@ export const routes: FastifyPluginCallback = async (fastify, opts) => {
   /** Create one presentation, from an existing one */
   server.post<{Body: ID }>('/presentation', {
     schema: {
-      body: idSchema
+      body: idSchema,
+      response: {
+        '2xx': Type.String()
+      }
     },
     onRequest: fastify.auth([
       fastify.handleAuth,

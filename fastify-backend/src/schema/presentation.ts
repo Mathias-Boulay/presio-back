@@ -68,6 +68,15 @@ export const userPresentationSchema = Type.Intersect([
   })
 ]);
 
+export const presentationMetadataSchema = Type.Object({
+  count: Type.Number()
+});
+
+export const simplePresentationSchema = Type.Object({
+  id: Type.String(),
+  name: Type.String()
+})
+
 export type ID = Static<typeof idSchema>;
 export type Position = Static<typeof positionSchema>;
 export type Rotation = Static<typeof rotationSchema>;
@@ -78,6 +87,8 @@ export type DevicePresentation = Static<typeof devicePresentationSchema>;
 export type Presentation = Static<typeof presentationSchema>;
 export type UserPresentation = Static<typeof userPresentationSchema>;
 
+export type presentationMetadata = Static<typeof presentationMetadataSchema>;
+export type simplePresentation = Static<typeof simplePresentationSchema>;
 
 
 
