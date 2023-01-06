@@ -7,5 +7,5 @@ COPY ./default.conf /etc/nginx/conf.d/default.conf
 COPY ./devices /opt/assets/devices
 
 # Bring the dist folder (Front end)
-COPY ./dist /opt/app/
+COPY ./dist /opt/dist/
 
