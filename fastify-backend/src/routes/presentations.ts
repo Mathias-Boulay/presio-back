@@ -7,7 +7,6 @@ import { Presentation, presentationMetadataSchema, presentationSchema, simplePre
 import { ID, idSchema } from "../schema/presentation";
 import { Pagination, paginationSchema } from "../schema/parts/pagination";
 import { Type } from "@sinclair/typebox";
-import { Presentation } from "../dbschema/modules/default";
 
 
 

@@ -8,23 +8,21 @@
     "build": "tsc -p tsconfig.json",
     "//build_edgeql_js": "Generate query builder files",
     "build_edgeql_js": "npx @edgedb/generate edgeql-js --out ./src/dbschema --force-overwrite -H 127.0.0.1 -P 5656 --target ts --tls-security insecure",
-
     "//build_edge_types": "The output path is not yet configurable, so just wrap the command with file operations",
     "build_edge_types": "mkdir ./dbschema && npx @edgedb/generate interfaces --force-overwrite -H 127.0.0.1 -P 5656 --tls-security insecure && mv ./dbschema/* ./src/dbschema/ && rm -R ./dbschema",
-
     "build_db": "npm run build_edgeql_js && npm run build_edge_types",
-
     "migrate_db": "edgedb migration create --schema-dir=../edge-db/dbschema -H 127.0.0.1 -P 5656 --tls-security insecure",
-
     "start": "nodemon --experimental-specifier-resolution=node ./index.js",
     "dev": ""
   },
   "author": "Mathias Boulay",
   "license": "",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.241.0",
     "@fastify/auth": "^4.2.0",
     "@fastify/cors": "^8.2.0",
     "@fastify/env": "^4.2.0",
+    "@fastify/multipart": "^7.3.0",
     "@fastify/type-provider-typebox": "^2.4.0",
     "@sinclair/typebox": "^0.25.13",
     "edgedb": "^1.0.2",

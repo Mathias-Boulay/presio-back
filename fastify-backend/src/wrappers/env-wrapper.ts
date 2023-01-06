@@ -7,6 +7,9 @@ declare module 'fastify' {
       GOOGLE_AUTH_ID: string,
       GOOGLE_AUTH_SECRET: string,
       GOOGLE_AUTH_RETURN_URI: string,
+      CLOUDFLARE_R2_ACCESS_ID: string,
+      CLOUDFLARE_R2_ACCESS_KEY: string,
+      CLOUDFLARE_R2_ACCOUNT_ID: string
     };
   }
 }
@@ -18,6 +21,9 @@ const schema = {
     GOOGLE_AUTH_ID: { type: 'string'},
     GOOGLE_AUTH_SECRET: { type: 'string'},
     GOOGLE_AUTH_RETURN_URI: { type: 'string'},
+    CLOUDFLARE_R2_ACCESS_ID: {type: 'string'},
+    CLOUDFLARE_R2_ACCESS_KEY: {type: 'string'},
+    CLOUDFLARE_R2_ACCOUNT_ID: {type: 'string'}
   },
 
   required: [ 'GOOGLE_AUTH_ID', 'GOOGLE_AUTH_SECRET', 'GOOGLE_AUTH_RETURN_URI' ]

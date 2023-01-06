@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { edgedb } from './dbschema/imports'
+import { edgedb } from '../dbschema/imports'
 
 /**
  * Wrapper file to decorate fastify with an edgedb instance

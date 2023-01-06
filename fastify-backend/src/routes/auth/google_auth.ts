@@ -12,7 +12,6 @@ export const googleCheck: IdentityCheckerFunction = async (token) => {
       url: 'https://www.googleapis.com/oauth2/v3/userinfo'
     });
 
-    console.log(userInfo);
     return userinfo.data.email;
 
   } catch(error) {

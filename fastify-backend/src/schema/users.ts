@@ -15,5 +15,10 @@ export const userSchema = Type.Object({
   permissions: permissionsSchema
 });
 
+export const userMetadataSchema = Type.Object({
+  count: Type.Number()
+});
+
 export type Permissions = Static<typeof permissionsSchema>;
 export type User = Static<typeof userSchema>;
+export type userMetadata = Static<typeof userMetadataSchema>;

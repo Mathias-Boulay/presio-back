@@ -4,12 +4,15 @@ import fastifyAuth from '@fastify/auth'
 import * as edgedb from "edgedb";
 import e from './dbschema'
 import { decorateInstance as decorateInstanceAuth} from './routes/auth/authentication';
-import { decorateInstanceEdge } from './edgedb-wrapper';
+import { decorateInstanceEdge } from './wrappers/edgedb-wrapper';
 import { routes as userRoutes } from './routes/users'
 import { routes as presentationRoutes } from './routes/presentations'
+import { routes as userImageRoutes } from './routes/user-images';
 import { Presentation } from './dbschema/modules/default';
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import { decorateInstanceEnv } from './env-wrapper';
+import { decorateInstanceEnv } from './wrappers/env-wrapper';
+import { decorateInstanceS3 } from './wrappers/s3-wrapper';
+import multipart from '@fastify/multipart';
 
 
 export const fastifyInstance = Fastify().withTypeProvider<TypeBoxTypeProvider>();
@@ -19,19 +22,32 @@ await fastifyInstance.after();  // Ensure env is loaded
 
 decorateInstanceAuth(fastifyInstance);
 decorateInstanceEdge(fastifyInstance);
-
+decorateInstanceS3(fastifyInstance);
 
 fastifyInstance
   .register(cors)
   .register(fastifyAuth, {
     defaultRelation: 'and'
+  })
+  .register(multipart, {
+    limits: {
+      fieldNameSize: 100, // Max field name size in bytes
+      fieldSize: 100,     // Max field value size in bytes
+      fields: 10,         // Max number of non-file fields
+      fileSize: 1_000_000,    // For multipart forms, the max file size in bytes
+      files: 1,           // Max number of file fields
+      headerPairs: 10     // Max number of header key=>value pairs
+    }
   });
 
 // Load the plugins before defining routes
 await fastifyInstance.after(); 
 
 
-fastifyInstance.register(userRoutes).register(presentationRoutes);
+fastifyInstance
+  .register(userRoutes)
+  .register(presentationRoutes)
+  .register(userImageRoutes);
 
 // Bad, but good enough for development purposes
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
